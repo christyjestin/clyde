@@ -5,10 +5,12 @@ from math import ceil
 from tqdm import tqdm
 import numpy as np
 import jax.numpy as jnp
+import jax
 from datasets import load_dataset
 
 from utils import *
 
+CLEAR_CACHE_EVERY = 50
 
 def get_latest_checkpoint(patch_size, k):
     checkpoint_dir = f'{KMEANS_DIR}/{patch_size}/{k}'
@@ -45,7 +47,8 @@ def patch_kmeans(ds, patch_size, k, batch_size, num_iters):
         counts = jnp.zeros((k, 1), dtype=jnp.int32)
 
         num_batches = ceil(ds.num_rows / batch_size)
-        for batch in tqdm(ds.iter(batch_size=batch_size), total=num_batches):
+        for i, batch in tqdm(enumerate(ds.iter(batch_size=batch_size)), total=num_batches, 
+                             desc=f"Iteration {iter} of k-means:"):
             # pack batch of patches into single array
             patches = jnp.concat([patchify(jnp.array(img), patch_size) for img in batch['image']])
             # min color over patch
@@ -76,8 +79,12 @@ def patch_kmeans(ds, patch_size, k, batch_size, num_iters):
             # take a weighted average of this batch and the running tally
             new_means = alpha * means_update + (1 - alpha) * new_means
 
+            # clear cache to avoid JIT out of memory errors
+            if (i + 1) % CLEAR_CACHE_EVERY == 0:
+                jax.clear_caches()
+
         # save progress
-        random_vals = jnp.array(np.random.rand(k, size_squared * 3), dtype=jnp.float32)
+        random_vals = jnp.array(np.random.rand(k, size_squared), dtype=jnp.float32)
         # if the norm is 0, then this cluster was never the closest fit,
         # so we replace it with a random vector
         missed_clusters = jnp.linalg.norm(new_means, axis=1, keepdims=True) == 0
@@ -85,6 +92,8 @@ def patch_kmeans(ds, patch_size, k, batch_size, num_iters):
         # means should be unit vectors
         means = new_means / jnp.linalg.norm(new_means, axis=1, keepdims=True)
         jnp.save(f'{KMEANS_DIR}/{patch_size}/{k}/{iter}.npy', means)
+        # clear cache to avoid build up betweeen iterations
+        jax.clear_caches()
 
 
 if __name__ == '__main__':
