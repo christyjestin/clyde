@@ -1,7 +1,10 @@
+import numpy as np
 import jax.numpy as jnp
 
 PATCH_CACHE_DIR = 'patch_cache'
 KMEANS_DIR = 'kmeans'
+
+COLOR_MAX = 255
 
 # the grid rearrangement looks like this
 # 1 2 3
@@ -17,3 +20,9 @@ def patchify(arr: jnp.array, patch_size: int):
     arr = jnp.concat(jnp.split(arr, pw, axis=2)) # (ph * pw) x p x p x 3
     # flatten each patch while keeping the color channels
     return arr.reshape((ph * pw, patch_size * patch_size, 3))
+
+# draw `k` all positive vectors from the `size-squared`-dimensional unit sphere; this method is
+# from https://en.wikipedia.org/wiki/N-sphere#Uniformly_at_random_on_the_(n_%E2%88%92_1)-sphere
+def means_random_init(k, size_squared):
+    vecs = jnp.abs(jnp.array(np.random.normal(size=(k, size_squared)), dtype=jnp.float32))
+    return vecs / jnp.linalg.norm(vecs, axis=1, keepdims=True)

@@ -36,9 +36,7 @@ def patch_kmeans(ds, patch_size, k, batch_size, num_iters):
     if latest != -1:
         means = jnp.load(f'{KMEANS_DIR}/{patch_size}/{k}/{latest}.npy')
     else:
-        means = jnp.array(np.random.rand(k, size_squared), dtype=jnp.float32)
-        # we want our means to be unit vectors
-        means = means / jnp.linalg.norm(means, axis=1, keepdims=True)
+        means = means_random_init(k, size_squared)
     start = latest + 1
     for iter in range(start, start + num_iters):
         ds = ds.shuffle()
@@ -84,7 +82,7 @@ def patch_kmeans(ds, patch_size, k, batch_size, num_iters):
                 jax.clear_caches()
 
         # save progress
-        random_vals = jnp.array(np.random.rand(k, size_squared), dtype=jnp.float32)
+        random_vals = means_random_init(k, size_squared)
         # if the norm is 0, then this cluster was never the closest fit,
         # so we replace it with a random vector
         missed_clusters = jnp.linalg.norm(new_means, axis=1, keepdims=True) == 0
