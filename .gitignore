@@ -4,6 +4,7 @@ patch_cache/
 kmeans/
 temp/
 output.txt
+!kmeans/16/12000/3.npy
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
