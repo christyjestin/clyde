@@ -11,6 +11,7 @@ from datasets import load_dataset
 from utils import *
 
 CLEAR_CACHE_EVERY = 50
+SAVE_EVERY = 100
 
 def get_latest_checkpoint(patch_size, k):
     checkpoint_dir = f'{KMEANS_DIR}/{patch_size}/{k}'
@@ -81,15 +82,19 @@ def patch_kmeans(ds, patch_size, k, batch_size, num_iters):
             if (i + 1) % CLEAR_CACHE_EVERY == 0:
                 jax.clear_caches()
 
-        # save progress
-        random_vals = means_random_init(k, size_squared)
-        # if the norm is 0, then this cluster was never the closest fit,
-        # so we replace it with a random vector
-        missed_clusters = jnp.linalg.norm(new_means, axis=1, keepdims=True) == 0
-        new_means = jnp.where(missed_clusters, random_vals, new_means)
-        # means should be unit vectors
-        means = new_means / jnp.linalg.norm(new_means, axis=1, keepdims=True)
-        jnp.save(f'{KMEANS_DIR}/{patch_size}/{k}/{iter}.npy', means)
+            # save progress and reset counters
+            if (i + 1) % SAVE_EVERY == 0:
+                random_vals = means_random_init(k, size_squared)
+                # if the norm is 0, then this cluster was never the closest fit,
+                # so we replace it with a random vector
+                missed_clusters = jnp.linalg.norm(new_means, axis=1, keepdims=True) == 0
+                new_means = jnp.where(missed_clusters, random_vals, new_means)
+                # means should be unit vectors
+                means = new_means / jnp.linalg.norm(new_means, axis=1, keepdims=True)
+                jnp.save(f'{KMEANS_DIR}/{patch_size}/{k}/{iter}.npy', means)
+                # reset data structures
+                new_means = jnp.zeros_like(means)
+                counts = jnp.zeros((k, 1), dtype=jnp.int32)
         # clear cache to avoid build up betweeen iterations
         jax.clear_caches()
 
