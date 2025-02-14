@@ -22,9 +22,11 @@ This is based on the idea that there are common shapes and patterns that are ind
   
 The intuition is that the minimum value of a patch represents a base color, and the norm represents how stark the pattern is, but the final unit vector is what represents the actual underlying shape. Importantly, the best `k` means can be computed over an arbitrary dataset once and then saved to work quickly and out of the box on any new image of any size. In my case, I used the `nlphuji/flickr30k` dataset available on HuggingFace.
 
-This algorithm is more lossy, but it's also a much more significant compression. I'll be honest: I've had a very hard time running this script over the entire dataset for a full five iterations without it crashing my Linux subsystem at some point. There was one jax related code change that did help out with this, and my laptop is likely part of the problem, but **be warned**. The reconstructed image has gridline artifacts from where the patches are split up, and while you do still see most of the structure, it doesn't look nature, and there is significant loss.
+This algorithm is more lossy, but it's also a much more significant compression. I'll be honest: I've had a very hard time running this script over the entire dataset for a full five iterations without it crashing my Linux subsystem at some point. There was one jax related code change that did help out with this, and my laptop is likely part of the problem, but **be warned**.
 
-Both the artifacts and the accuracy are improved significantly through composite reconstruction: rather than breaking up the image into patches once, shift the patch gridlines to create multiple reconstructions, then average out these shifted reconstructions. This does reduce the level of compression, and it does introduce a blur typical of average methods.
+> You don't have to worry about computing the k-means yourself. Instead, I've saved a `.npy` with means for the setting of `patch_size` equal to 16 and `k` equal to 12000. You can run just the visualizer with the saved means as long as you use those settings.
+
+The reconstructed image has gridline artifacts from where the patches are split up, and while you do still see most of the structure, it doesn't look nature, and there is significant loss. Both the artifacts and the accuracy are improved significantly through composite reconstruction: rather than breaking up the image into patches once, shift the patch gridlines to create multiple reconstructions, then average out these shifted reconstructions. This does reduce the level of compression, and it does introduce a blur typical of average methods.
 
 <h3>  Original Image: </h3>
 <img src="https://github.com/user-attachments/assets/3cb44b7f-6997-4f99-9d61-3ac318d2cb86"/>
