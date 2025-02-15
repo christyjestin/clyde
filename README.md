@@ -13,6 +13,8 @@ This runs the K-means algorithm over a single image by treating each pixel as a 
 <h3 align="center"> After One Iteration: </h3>
 <img src="https://github.com/user-attachments/assets/f49d038c-06ba-4bc8-bf15-aa87a30838a9"/>
 
+**Yes I know, it looks incredibly close to the original, but you can see the patches if you look closely at the thighs or shorts.**
+
 ### Patch Kmeans
 
 This is based on the idea that there are common shapes and patterns that are independent of color. To find these patterns, the pipeline:
