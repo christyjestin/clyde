@@ -11,7 +11,7 @@ This runs the K-means algorithm over a single image by treating each pixel as a 
 <h3 align="center">  Original Image: </h3>
 <img src="https://github.com/user-attachments/assets/485cbd69-0ab7-45b4-8f5b-574546d49e2c"/>
 <h3 align="center"> After One Iteration: </h3>
-<img src="https://github.com/user-attachments/assets/eb18488b-48b4-4bf8-9422-a6229473be74"/>
+<img src="https://github.com/user-attachments/assets/f49d038c-06ba-4bc8-bf15-aa87a30838a9"/>
 
 ### Patch Kmeans
 
